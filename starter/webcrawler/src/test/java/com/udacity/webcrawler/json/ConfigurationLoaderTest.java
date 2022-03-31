@@ -35,8 +35,7 @@ public final class ConfigurationLoaderTest {
       fail("Streams should usually be closed in the same scope where they were created", e);
     }
 
-    assertThat(config.getStartPages())
-        .containsExactly("http://example.com", "http://example.com/foo").inOrder();
+    assertThat(config.getStartPages()).containsExactly("http://example.com", "http://example.com/foo").inOrder();
     assertThat(config.getIgnoredUrls()).hasSize(1);
     assertThat(config.getIgnoredUrls().get(0).pattern()).isEqualTo("http://example\\.com/.*");
     assertThat(config.getIgnoredWords()).hasSize(1);
