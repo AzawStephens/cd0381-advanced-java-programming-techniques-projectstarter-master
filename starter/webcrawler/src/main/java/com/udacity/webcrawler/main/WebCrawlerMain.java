@@ -47,6 +47,7 @@ public final class WebCrawlerMain {
 //      Path path = Paths.get(config.getResultPath());
 //      resultWriter.write(path);
 //    }else
+
 //    {
 //      System.out.println("Empty path");
 //      Writer writer = new OutputStreamWriter(System.out);
