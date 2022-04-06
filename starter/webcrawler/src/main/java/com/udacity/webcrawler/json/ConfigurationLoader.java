@@ -1,8 +1,8 @@
 package com.udacity.webcrawler.json;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.io.Reader;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -29,12 +29,12 @@ public final class ConfigurationLoader {
    */
   public CrawlerConfiguration load() {
     // TODO: Fill in this method.
-    try
+    try(BufferedReader bufferedReader =  Files.newBufferedReader(path))
     {
-      Reader theReader = Files.newBufferedReader(path);
-      theReader.close();
+      Reader theReader = bufferedReader;
       return read(theReader);
-    }catch (IOException e){e.getStackTrace();}
+    }catch (IOException e){e.getStackTrace(); System.out.println("load threw an exception");}
+
     return new CrawlerConfiguration.Builder().build();
   }
 
@@ -48,16 +48,14 @@ public final class ConfigurationLoader {
 
   public static CrawlerConfiguration read(Reader reader) {
     // This is here to get rid of the unused variable warning.
-    //Objects.requireNonNull(reader);
     // TODO: Fill in this method
     ObjectMapper objectMapper = new ObjectMapper();
     objectMapper.disable(JsonParser.Feature.AUTO_CLOSE_SOURCE);
-
   try
   {
-    CrawlerConfiguration crawler = objectMapper.readValue(reader,CrawlerConfiguration.Builder.class).build();
+    CrawlerConfiguration crawler = objectMapper.readValue(new BufferedReader(reader),CrawlerConfiguration.Builder.class).build();
     return crawler;
   }
-  catch (Exception e){System.out.println("Exception thrown");return new CrawlerConfiguration.Builder().build();}
+  catch (Exception e){System.out.println("Exception thrown in read method " + e.getMessage());return new CrawlerConfiguration.Builder().build();}
   }
 }

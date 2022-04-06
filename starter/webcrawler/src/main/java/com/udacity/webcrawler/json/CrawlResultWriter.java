@@ -44,7 +44,8 @@ public final class CrawlResultWriter {
       Writer theWriter = Files.newBufferedWriter(path);
       theWriter.close();
       write(theWriter);
-    }catch (IOException e){e.getStackTrace();}
+      System.out.println("path wrote");
+    }catch (IOException e){System.out.println("Exception thrown inside of write(Path) method");}
   }
 
   /**
@@ -62,6 +63,6 @@ public final class CrawlResultWriter {
     {
       objectMapper.writeValue(writer,result);
     }
-    catch (Exception e){System.out.println("Exception");}
+    catch (Exception e){System.out.println("Exception inside write method");}
 }
 }
