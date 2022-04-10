@@ -2,14 +2,16 @@ package com.udacity.webcrawler;
 
 import com.udacity.webcrawler.json.CrawlResult;
 import com.udacity.webcrawler.parser.PageParserFactory;
-import com.udacity.webcrawler.profiler.InternalCrawlerBuilder;
-import com.udacity.webcrawler.profiler.RecursiveWorks;
+import com.udacity.webcrawler.profiler.RecursiveWork;
 
 import javax.inject.Inject;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ForkJoinPool;
 import java.util.regex.Pattern;
 
@@ -26,6 +28,7 @@ final class ParallelWebCrawler implements WebCrawler
   private final PageParserFactory parserFactory;
   private final List<Pattern> ignoredUrls;
   private final int maxDepth;
+  private final Set<String> visitedUrls;
 
 
   @Inject
@@ -36,7 +39,8 @@ final class ParallelWebCrawler implements WebCrawler
           @TargetParallelism int threadCount,
           @IgnoredUrls List<Pattern> ignoredUrls,
           @MaxDepth int maxDepth,
-          PageParserFactory parserFactory) {
+          PageParserFactory parserFactory,
+          Set<String> visitedUrls) {
     this.clock = clock;
     this.timeout = timeout;
     this.popularWordCount = popularWordCount;
@@ -44,6 +48,7 @@ final class ParallelWebCrawler implements WebCrawler
     this.pool = new ForkJoinPool(Math.min(threadCount, getMaxParallelism()));
     this.parserFactory = parserFactory;
     this.ignoredUrls = ignoredUrls;
+    this.visitedUrls = visitedUrls;
 
   }
 
@@ -51,12 +56,12 @@ final class ParallelWebCrawler implements WebCrawler
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
     Instant deadline = clock.instant().plus(timeout);
-    Map<String, Integer> counts = new HashMap<>();
-    Set<String> visitedUrls = new HashSet<>();
+    ConcurrentMap<String, Integer> counts = new ConcurrentHashMap<>();
+    ConcurrentSkipListSet<String> visitedUrls = new ConcurrentSkipListSet<>(); // may have to change this to ConcorrentSkipListSet(Set<String>) later
 
     for (String url : startingUrls) {
 
-      pool.invoke(new RecursiveWorks(url, deadline,maxDepth,counts,visitedUrls));
+      pool.invoke(new RecursiveWork(url, deadline,maxDepth,counts,  visitedUrls, ignoredUrls, clock, parserFactory));
     }
 
     if (counts.isEmpty()) {
@@ -73,7 +78,7 @@ final class ParallelWebCrawler implements WebCrawler
 
 
   }
-  //Below is where the magic takes place.
+
 
 
 
