@@ -30,7 +30,7 @@ final class WordCounts {
     // TODO: Reimplement this method using only the Stream API and lambdas and/or method references.
 
     PriorityQueue<Map.Entry<String, Integer>> sortedCounts =
-        new PriorityQueue<>(wordCounts.size(), new WordCountComparator());
+            new PriorityQueue<>(wordCounts.size(), new WordCountComparator());
     sortedCounts.addAll(wordCounts.entrySet());
     Map<String, Integer> topCounts = new LinkedHashMap<>();
     for (int i = 0; i < Math.min(popularWordCount, wordCounts.size()); i++) {

@@ -19,13 +19,13 @@ public final class InternalCrawlerBuilder {
     private final Set<String> visitedUrls;
 
 
-  private InternalCrawlerBuilder(String url, Instant deadline, int maxDepth, Map<String, Integer> counts, Set<String> visitedUrls) {
-      this.url = url;
-      this.deadline = deadline;
-      this.maxDepth = maxDepth;
-      this.counts = counts;
-      this.visitedUrls = visitedUrls;
-  }
+    private InternalCrawlerBuilder(String url, Instant deadline, int maxDepth, Map<String, Integer> counts, Set<String> visitedUrls) {
+        this.url = url;
+        this.deadline = deadline;
+        this.maxDepth = maxDepth;
+        this.counts = counts;
+        this.visitedUrls = visitedUrls;
+    }
 
     public String getUrl()
     {
@@ -91,5 +91,4 @@ public final class InternalCrawlerBuilder {
         }
 
     }
-    }
-
+}
