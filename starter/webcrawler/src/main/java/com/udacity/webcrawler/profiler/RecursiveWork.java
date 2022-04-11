@@ -15,8 +15,8 @@ public class RecursiveWork extends RecursiveAction {
     private String url;
     private Instant deadline;
     private int maxDepth;
-    private Map<String, Integer> counts;
-    Map<String, Integer> syncCounts = Collections.synchronizedMap(counts);
+  //  private Map<String, Integer> counts;
+    private Map<String, Integer> counts = Collections.synchronizedMap(new HashMap<>());
     private ConcurrentSkipListSet<String> visitedUrls;
     private Clock clock;
     private List<Pattern> ignoredUrls;
@@ -58,7 +58,7 @@ public class RecursiveWork extends RecursiveAction {
         }
         List<RecursiveWork> subtasks = new ArrayList<>();
         for (String aUrl : result.getLinks()) {
-            subtasks.add(new RecursiveWork(aUrl, deadline, maxDepth - 1, syncCounts, visitedUrls));
+            subtasks.add(new RecursiveWork(aUrl, deadline, maxDepth - 1, counts, visitedUrls));
         }
         invokeAll(subtasks);
     }

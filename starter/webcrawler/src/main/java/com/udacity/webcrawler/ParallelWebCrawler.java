@@ -56,7 +56,7 @@ final class ParallelWebCrawler implements WebCrawler
   @Override
   public CrawlResult crawl(List<String> startingUrls) {
     Instant deadline = clock.instant().plus(timeout);
-    ConcurrentMap<String, Integer> counts = new ConcurrentHashMap<>();
+    Map<String, Integer> counts = Collections.synchronizedMap(new HashMap<>());
     ConcurrentSkipListSet<String> visitedUrls = new ConcurrentSkipListSet<>();
 
     for (String url : startingUrls) {
