@@ -36,22 +36,23 @@ final class ProfilerImpl implements Profiler {
     //       ProfilingMethodInterceptor and return a dynamic proxy from this method.
     //       See https://docs.oracle.com/javase/10/docs/api/java/lang/reflect/Proxy.html.
 
-  if(klass.getMethods()!= null) {
-    {
+  if(klass.getMethods().length !=0) {
+
       Method[] theMethods = klass.getMethods();
       InvocationHandler invocationHandler = new ProfilingMethodInterceptor(delegate, clock, state);
       for (Method method : theMethods) {
-        if (method.isAnnotationPresent(Profiled.class)) {
+        if (method.getAnnotation(Profiled.class) !=null) {
+          @SuppressWarnings("unchecked")
           T proxy = (T) Proxy.newProxyInstance(
                   klass.getClassLoader(),
                   new Class[]{klass},
                   invocationHandler);
           return proxy;
-        }
+        }else{throw new IllegalArgumentException("Method not annotated with Profiled");}
       }
-    }
+
   }
-    return null;
+    return delegate;
   }
 
   @Override

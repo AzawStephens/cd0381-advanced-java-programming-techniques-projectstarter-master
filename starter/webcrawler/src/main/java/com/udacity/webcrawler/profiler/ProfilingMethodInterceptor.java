@@ -14,11 +14,11 @@ class ProfilingMethodInterceptor implements InvocationHandler {
     private Clock clock;
     private ProfilingState profilingState;
     private ZonedDateTime startTime;
-    private Object delegate;
-    Object targetObject;
+    private Object theObject;
 
-    public ProfilingMethodInterceptor(Object delegate, Clock clock, ProfilingState profilingState) {
-        this.delegate = Objects.requireNonNull(delegate);
+
+    public ProfilingMethodInterceptor(Object theObject, Clock clock, ProfilingState profilingState) {
+        this.theObject = Objects.requireNonNull(theObject);
         this.clock = Objects.requireNonNull(clock);
         this.profilingState = Objects.requireNonNull(profilingState);
     }
@@ -31,18 +31,17 @@ class ProfilingMethodInterceptor implements InvocationHandler {
                 Instant theStartTime = clock.instant();
                 try
                 {
-                    method.invoke(delegate.getClass(), args);
-                }catch (Throwable exception){throw exception.getCause();}
+                    method.invoke(theObject, args);
+                }catch (Throwable e){throw e.getCause();}
                 finally {
                     if(method.isAnnotationPresent(Profiled.class))
                     {
                         Duration duration = Duration.between(theStartTime, clock.instant());
-                        profilingState.record(ProfilingMethodInterceptor.class, method, duration);
+                        profilingState.record(theObject.getClass(), method, duration);
                     }
                 }
             }
-            return method.invoke(delegate.getClass(),args);
 
+            return method.invoke(theObject,args);
         }
-
 }
