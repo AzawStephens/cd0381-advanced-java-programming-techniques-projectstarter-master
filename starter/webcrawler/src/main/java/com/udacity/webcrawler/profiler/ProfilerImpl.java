@@ -29,30 +29,29 @@ final class ProfilerImpl implements Profiler {
   }
 
   @Override
-  public <T> T wrap(Class<T> klass, T delegate) {
+  public <T> T wrap(Class<T> klass, T delegate) throws IllegalArgumentException  {
     Objects.requireNonNull(klass);
 
     // TODO: Use a dynamic proxy (java.lang.reflect.Proxy) to "wrap" the delegate in a
     //       ProfilingMethodInterceptor and return a dynamic proxy from this method.
     //       See https://docs.oracle.com/javase/10/docs/api/java/lang/reflect/Proxy.html.
 
-    Method[] theMethods = klass.getMethods();
-    for (Method method: theMethods)
+  if(klass.getMethods()!= null) {
     {
-      if(method.isAnnotationPresent(Profiled.class))
-      {
-
-        Object proxy = newProxyInstance(
-                klass.getClassLoader(),
-                klass.getInterfaces(),
-                new ProfilingMethodInterceptor(delegate,clock, state, startTime));
-
-            return (T)proxy;
+      Method[] theMethods = klass.getMethods();
+      InvocationHandler invocationHandler = new ProfilingMethodInterceptor(delegate, clock, state);
+      for (Method method : theMethods) {
+        if (method.isAnnotationPresent(Profiled.class)) {
+          T proxy = (T) Proxy.newProxyInstance(
+                  klass.getClassLoader(),
+                  new Class[]{klass},
+                  invocationHandler);
+          return proxy;
+        }
       }
     }
-
-
-    return delegate;
+  }
+    return null;
   }
 
   @Override
@@ -69,38 +68,5 @@ final class ProfilerImpl implements Profiler {
     writer.write(System.lineSeparator());
   }
 
-}
- class ProfilingMethodInterceptor implements InvocationHandler
-{
-  private Clock clock;
-  private ProfilingState profilingState;
-  private ZonedDateTime startTime;
-  private Object delegate;
-  Object targetObject;
-  public ProfilingMethodInterceptor(Object delegate, Clock clock, ProfilingState profilingState, ZonedDateTime startTime )
-  {
-    this.delegate = delegate;
-    this.clock = clock;
-    this.profilingState = profilingState;
-    this.startTime = startTime;
-  }
-
-  @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-    try
-    {
-
-        Duration duration = Duration.between(startTime,clock.instant());
-        profilingState.record(ProfilingMethodInterceptor.class,method,duration);
-        return method.invoke(method.getClass(),args);
-    }catch(InvocationTargetException e)
-    {
-      Duration duration = Duration.between(startTime,clock.instant());
-      profilingState.record(ProfilingMethodInterceptor.class,method,duration);
-      throw e.getTargetException();}
-    catch(UndeclaredThrowableException e){return e.getUndeclaredThrowable();}
-      //this maybe wrong
-  }
 }
 
